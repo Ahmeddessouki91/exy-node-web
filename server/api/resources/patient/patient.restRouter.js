@@ -4,9 +4,9 @@ const express = require('express');
 const patientRouter = express.Router();
 
 patientRouter.route('/')
-    .get((req, res) => res.json({ OK: true }));
+    .get((req, res, next) => res.json({ OK: true }));
 
-patientRouter.route('/:id').get((req, res) => {
+patientRouter.route('/:id').get((req, res, next) => {
     res.json({ id: req.params.id });
 });
 
