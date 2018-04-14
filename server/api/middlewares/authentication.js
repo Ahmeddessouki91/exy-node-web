@@ -6,7 +6,7 @@ const jwt = require('jsonwebtoken');
 
 const _ = require('lodash');
 
-// const checkToken = expressJwt({ secret: config.secrets.jwt });
+const checkToken = expressJwt({ secret: config.secrets.jwt });
 
 // const decodeToken = () => (req, res, next) => {
 //     if (config.disableAuth) {
@@ -27,7 +27,9 @@ const _ = require('lodash');
 // }
 
 const authenticate = (req, res, next) => {
-    var token = req.header('Bearer');
+    var token = req.headers.authorization.split(' ')[1] || req.body.token || req.query.token
+
+    console.log(token);
 
     User.findByToken(token).then((user) => {
         if (!user) {
@@ -38,9 +40,34 @@ const authenticate = (req, res, next) => {
         req.token = token;
         next();
     }).catch((e) => {
-        res.status(401).send();
+        res.status(401).send("Unauthorized");
     });
 };
 
+const signIn = (req, res, next) => {
 
-module.exports = { authenticate };
+    var body = _.pick(req.body, ['email', 'password']);
+
+    User.findByCredentials(body.email, body.password).then((user) => {
+        return user.generateAuthToken().then((token) => {
+            res.header('bearer', token).send(user);
+        });
+    }).catch((e) => {
+        res.status(400).send();
+    });
+};
+
+const register = (req, res, next) => {
+    // var body = _.pick(req.body, ['email', 'password']);
+    let body = req.body;
+    let user = new User(body);
+    user.save().then((res) => {
+        return user.generateAuthToken();
+    }).then((token) => {
+        res.header('Bearer', token).send(user);
+    }).catch((e) => {
+        res.status(400).send(e);
+    })
+}
+
+module.exports = { signIn, register, authenticate };
