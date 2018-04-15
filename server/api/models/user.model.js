@@ -71,12 +71,14 @@ UserSchema.methods.generateAuthToken = function () {
     var user = this;
 
     var access = "Bearer";
-    var token = jwt.sign({ _id: user._id.toHexString(), access }, config.secrets.jwt).toString();
-    user.tokens.push({ access, token });
+    var token = jwt.sign({ _id: user._id, access }, config.secrets.jwt, { expiresIn: config.expireTime });
+    // user.tokens.push({ access, token });
 
-    return user.save().then(() => {
-        return token;
-    });
+    // return user.save().then(() => {
+    //     return token;
+    // });
+
+    return token;
 };
 
 UserSchema.statics.findByToken = function (token) {
@@ -93,7 +95,8 @@ UserSchema.statics.findByToken = function (token) {
 
 UserSchema.statics.findByCredentials = function (email, password) {
     var User = this;
-    return User.findOne({ email }).then((user) => {
+    //.or([{ email: email }, { mobile: email }])
+    return User.findOne({ $or: [{ email: email }, { mobile: email }] }).then((user) => {
         if (!user)
             return Promise.reject();
 
