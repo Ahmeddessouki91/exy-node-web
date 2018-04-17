@@ -1,7 +1,7 @@
 const express = require('express');
 const { SetGlobalMiddlewares } = require('./middlewares')
 const restRouter = require('./api/restRouter');
-const { protect, signIn, register } = require('./api/auth/authentication');
+const { protect, signIn, register } = require('./api/auth/auth');
 const userRoute = require('./api/resources/user/user.restRouter');
 const app = express();
 var { mongoose } = require('./db/mongoose');
